@@ -1,0 +1,25 @@
+version: "2.3"
+services:
+  zf_zurich:
+    build:
+      context : .
+      dockerfile: Dockerfile
+    network_mode: "host"
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+      - UID
+    runtime: nvidia
+    volumes:
+      - /dev:/dev
+      - /lib/modules:/lib/modules
+      - /run/systemd/system:/run/systemd/system:rw
+      - /tmp/.X11-unix
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      - /run/user/1000/gdm/Xauthority:/root/.Xauthority
+      - ./src:/app
+    privileged: true
+    cap_add:
+      - ALL
+    ipc: host
+    tty: true
