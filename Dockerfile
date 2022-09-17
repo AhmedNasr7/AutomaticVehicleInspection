@@ -16,5 +16,6 @@ RUN pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/c
 
 RUN /bin/bash -c "pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'"
 RUN pip3 install scikit-image seaborn numpy
+
 RUN mkdir /app
 WORKDIR /app

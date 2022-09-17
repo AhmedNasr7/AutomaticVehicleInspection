@@ -18,8 +18,13 @@ services:
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - /run/user/1000/gdm/Xauthority:/root/.Xauthority
       - ./src:/app
+      - ./model/:/app/model
+      - ./data:/app/data
     privileged: true
     cap_add:
       - ALL
     ipc: host
     tty: true
+
+
+
