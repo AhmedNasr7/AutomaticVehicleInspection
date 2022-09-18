@@ -17,7 +17,7 @@ from detectron2.utils.visualizer import ColorMode
 
 from pathlib import Path
 from time import time
-
+from scipy.spatial import distance 
 
 ## configs: 
 
@@ -84,7 +84,7 @@ class Model:
                         instance_mode=ColorMode.IMAGE
         )
 
-        print("output: ", outputs["instances"])
+        # print("output: ", outputs["instances"])
         out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
         output_image = out.get_image()
@@ -98,7 +98,7 @@ class Model:
         t1 = time()
 
         print("model inference time: ", t1 - t0)
-        return output_image
+        return output_image, outputs
 
 
 
@@ -139,21 +139,122 @@ class Part_Model(Model):
 
 
 
+class Damage_Part_Model:
+
+    def __init__(self, damage_weights="", parts_weights="", device='cpu') -> None: 
+        self.damage_model = Damage_Model(weights=damage_weights, device=device)
+        self.parts_model = Part_Model(weights=parts_weights, device=device)
+
+        self.damage_class_mapping = self.damage_model.class_mapping
+        self.parts_class_mapping = self.parts_model.class_mapping
+
+
+
+    def get_output_dict(self, outputs, class_mappings):
+
+        prediction_classes = [class_mappings[el] + "_" + str(indx) for indx, el in enumerate(outputs["instances"].pred_classes.tolist())]
+        polygon_centers = outputs["instances"].pred_boxes.get_centers().tolist()
+        output_dict = dict(zip(prediction_classes,polygon_centers))
+
+        return output_dict
+
+
+
+    def detect_damage_part(self, damage_dict, parts_dict):
+
+        """
+        Returns the most plausible damaged part for the list of damages by checking the distance 
+        between centers centers of damage_polygons and parts_polygons
+
+        Parameters
+        -------------
+        damage_dict: dict
+                        Dictionary that maps damages to damage polygon centers.
+        parts_dict: dict
+                        Dictionary that maps part labels to parts polygon centers.
+        Return
+        ----------
+        part_name: str
+                    The most plausible damaged part name.
+        """
+        
+
+        try:
+            max_distance = 10e9
+
+            if len(damage_dict) == 0:
+                # print("No damage")
+                return None
+            
+            elif len(parts_dict) > 0:
+                print("No parts detected")
+                return ["damage"]
+
+
+            # assert len(damage_dict) > 0, "AssertError: damage_dict should have at least one damage"
+            # assert len(parts_dict) >0, "AssertError: parts_dict should have at least one part"
+
+            max_distance_dict = dict(zip(damage_dict.keys(),[max_distance]*len(damage_dict)))
+            part_name = dict(zip(damage_dict.keys(),['']*len(damage_dict)))
+
+            for y in parts_dict.keys():
+                for x in damage_dict.keys():
+                    dis = distance.euclidean(damage_dict[x], parts_dict[y])
+                    if dis < max_distance_dict[x]:
+                        part_name[x] = y.rsplit('_',1)[0]
+
+            return list(set(part_name.values()))
+
+
+        except Exception as e:
+            print(str(e))
+            return None
+
+    def __call__(self, image_path):
+
+        image = cv2.imread(image_path)
+
+        damage_outputs = self.damage_model.model(image)
+        parts_outputs = self.parts_model.model(image)
+
+        damage_dict = self.get_output_dict(damage_outputs, self.damage_class_mapping)
+        parts_dict = self.get_output_dict(parts_outputs, self.parts_class_mapping)
+
+        damaged_part = self.detect_damage_part(damage_dict, parts_dict)
+
+        return damaged_part
+
+
+
+
+
+        
+
+
+
 if __name__ == "__main__":
 
 
-    image_path = "/app/data/Car2.jpg"
-    damage_weights = "/app/model/Detectron2_damage.pth"
+    image_path = "/app/data/18.jpg"
+    damage_weights = "/app/model/damage_2.pth"
     parts_weights = "/app/model/Detectron2_part.pth"
 
-    damage_model = Damage_Model(weights=damage_weights, device="cpu")
+    # damage_model = Damage_Model(weights=damage_weights, device="cpu")
 
-    t0 = time()
-    parts_model = Part_Model(weights=parts_weights, device="cpu")
+    # t0 = time()
+    # parts_model = Part_Model(weights=parts_weights, device="cpu")
 
-    print("model loading time: ", time() - t0)
+    # print("model loading time: ", time() - t0)
 
-    # output_image = damage_model(image_path)
-    image = parts_model(image_path=image_path)
+    # # output_image = damage_model(image_path)
+    # image = parts_model(image_path=image_path)
 
+    integrated_model = Damage_Part_Model(damage_weights, parts_weights, device="cuda")
+
+    damage_part = integrated_model(image_path)
+
+    print("Damage: ", damage_part)
+    if damage_part == None: 
+        print("No damage detected")
+    
         

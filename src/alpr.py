@@ -17,7 +17,21 @@ class Configs:
     token = "d7ad93a31ab088a532040e45d4841b26acb6d0f1"
 
 
-def get_plate_number(image_object):
+def get_plate_number(image_path):
+
+
+    image = Image.open(image_path)
+    img_byte_arr = BytesIO()
+    image.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+
+    results, plate_num = _get_plate_number_from_obj(img_byte_arr)
+
+    return plate_num
+
+    
+    
+def _get_plate_number_from_obj(image_object):
     
     response = requests.post(Configs.url,
         # data=dict(regions=regions),  # Optional
