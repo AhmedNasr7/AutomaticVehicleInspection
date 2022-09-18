@@ -187,7 +187,7 @@ class Damage_Part_Model:
                 return None
             
             elif len(parts_dict) > 0:
-                print("No parts detected")
+                # print("No parts detected")
                 return ["damage"]
 
 

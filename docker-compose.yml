@@ -20,6 +20,8 @@ services:
       - ./src:/app
       - ./model/:/app/model
       - ./data:/app/data
+      - ./output_model:/app/output_model
+      - ./node_js/uploads:/app/uploads
     privileged: true
     cap_add:
       - ALL
