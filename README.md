@@ -24,9 +24,5 @@ This project was developed at HackZurich 2022 to participate at the [Visual Sens
 2. Run the docker container using Docker compose: ```Docker-compose up```
 
 
-### Results
-
-TBD
-
 
 
