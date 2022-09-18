@@ -2,10 +2,10 @@
 
 Fleet management made easy
 
-This project was developed at HackZurich 2022 to participate at the [Visual Sensing and Vehicle Health Challenge Challenge (https://www.zf.com/products/en/cv/campaigns/hackathon/cvshackathon2022.html)
+This project was developed at HackZurich 2022 to participate at the [Visual Sensing and Vehicle Health Challenge Challenge](https://www.zf.com/products/en/cv/campaigns/hackathon/cvshackathon2022.html)
 
 
-### Please check out our project [**demo**](https://www.youtube.com/watch?v=c1owO-VarWE&feature=youtu.be)
+### Please check out our project [**demo**](https://www.youtube.com/watch?v=R1qSlSq9Pv4)
 
 ### :sparkles: Meet the team :sparkles:
 
